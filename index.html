@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>하노이의 탑 시뮬레이터</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons for modern look -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* 원판 드래그앤드롭 및 호버 효과용 트랜지션 */
+        .disk {
+            transition: transform 0.2s ease, width 0.3s ease;
+        }
+        .peg-container:hover .peg-shaft {
+            background-color: #6366f1; /* Indigo-500 */
+        }
+        .peg-container.selected .peg-shaft {
+            background-color: #ec4899; /* Pink-500 */
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.6);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between font-sans selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-indigo-600 p-2.5 rounded-lg text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-square-poll-vertical text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white">하노이의 탑 시뮬레이터</h1>
+                    <p class="text-xs text-slate-400">Tower of Hanoi Simulator</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-slate-300">원판 개수:</span>
+                <div class="flex items-center bg-slate-700 rounded-lg p-1 border border-slate-600">
+                    <button id="btn-decrease" class="px-3 py-1 hover:bg-slate-600 rounded text-lg font-bold transition-colors">-</button>
+                    <span id="disk-count-display" class="px-4 font-mono font-bold text-lg text-indigo-400">5</span>
+                    <button id="btn-increase" class="px-3 py-1 hover:bg-slate-600 rounded text-lg font-bold transition-colors">+</button>
+                </div>
+                <button id="btn-reset" class="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white px-4 py-2 rounded-lg font-semibold text-sm transition-all shadow-md shadow-indigo-600/20">
+                    <i class="fa-solid fa-rotate-left mr-1.5"></i> 초기화
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 flex flex-col gap-6 justify-center">
+        
+        <!-- Dashboard & Status -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Stats -->
+            <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/60 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div>
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">이동 횟수</p>
+                    <p class="text-3xl font-mono font-bold text-white mt-1">
+                        <span id="moves-count">0</span>
+                        <span class="text-slate-500 text-lg font-normal">/ <span id="min-moves-count">31</span></span>
+                    </p>
+                </div>
+                <div class="p-3 bg-slate-700/50 rounded-lg text-indigo-400">
+                    <i class="fa-solid fa-shoe-prints text-xl"></i>
+                </div>
+            </div>
+
+            <!-- Mode Selector / Status -->
+            <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/60 p-4 rounded-xl flex items-center justify-between shadow-sm">
+                <div class="w-full">
+                    <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">현재 상태</p>
+                    <p id="status-message" class="text-sm text-slate-300 font-medium mt-2 flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse inline-block"></span>
+                        원판을 드래그하거나 기둥을 선택해 이동하세요.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Auto-Solver Controls -->
+            <div class="bg-slate-800/80 backdrop-blur-sm border border-slate-700/60 p-4 rounded-xl flex flex-col justify-between shadow-sm">
+                <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-2">자동 해결 시뮬레이션</p>
+                <div class="flex items-center gap-2">
+                    <button id="btn-auto-solve" class="flex-grow bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/10">
+                        <i class="fa-solid fa-play"></i> <span id="btn-auto-solve-text">자동 해결 시작</span>
+                    </button>
+                    <button id="btn-auto-pause" class="hidden bg-amber-600 hover:bg-amber-500 active:scale-95 text-white py-1.5 px-3 rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-pause"></i> 일시정지
+                    </button>
+                    <!-- Speed Control -->
+                    <div class="flex items-center gap-1.5 bg-slate-700/50 px-2.5 py-1.5 rounded-lg border border-slate-600/50">
+                        <label for="speed-slider" class="text-[10px] text-slate-400 font-bold whitespace-nowrap">속도</label>
+                        <input id="speed-slider" type="range" min="100" max="1500" step="100" value="600" class="w-16 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Board (The Core of Hanoi) -->
+        <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 md:p-10 shadow-inner flex flex-col justify-between min-h-[350px] sm:min-h-[450px]">
+            <!-- The 3 Pegs Area -->
+            <div class="flex-grow grid grid-cols-3 gap-2 sm:gap-6 relative items-end">
+                
+                <!-- Peg A (Left) -->
+                <div id="peg-0" class="peg-container h-full flex flex-col justify-end items-center cursor-pointer group relative pt-10" data-peg-index="0">
+                    <!-- Invisible wider touch target -->
+                    <div class="absolute inset-y-0 w-full sm:w-4/5 z-0"></div>
+                    <!-- The actual wooden/metallic pole representation -->
+                    <div class="peg-shaft w-4 sm:w-5 h-5/6 bg-slate-700 rounded-t-full transition-all duration-300 relative z-10 shadow-md"></div>
+                    <!-- The Peg Label -->
+                    <span class="absolute top-2 text-xs font-bold px-2 py-0.5 rounded bg-slate-700/80 text-slate-300 select-none">기둥 A</span>
+                    <!-- Disk container (disks absolute positioned here) -->
+                    <div class="disk-holder absolute bottom-0 left-0 right-0 flex flex-col-reverse items-center z-20 pointer-events-none"></div>
+                </div>
+
+                <!-- Peg B (Center) -->
+                <div id="peg-1" class="peg-container h-full flex flex-col justify-end items-center cursor-pointer group relative pt-10" data-peg-index="1">
+                    <div class="absolute inset-y-0 w-full sm:w-4/5 z-0"></div>
+                    <div class="peg-shaft w-4 sm:w-5 h-5/6 bg-slate-700 rounded-t-full transition-all duration-300 relative z-10 shadow-md"></div>
+                    <span class="absolute top-2 text-xs font-bold px-2 py-0.5 rounded bg-slate-700/80 text-slate-300 select-none">기둥 B</span>
+                    <div class="disk-holder absolute bottom-0 left-0 right-0 flex flex-col-reverse items-center z-20 pointer-events-none"></div>
+                </div>
+
+                <!-- Peg C (Right) -->
+                <div id="peg-2" class="peg-container h-full flex flex-col justify-end items-center cursor-pointer group relative pt-10" data-peg-index="2">
+                    <div class="absolute inset-y-0 w-full sm:w-4/5 z-0"></div>
+                    <div class="peg-shaft w-4 sm:w-5 h-5/6 bg-slate-700 rounded-t-full transition-all duration-300 relative z-10 shadow-md"></div>
+                    <span class="absolute top-2 text-xs font-bold px-2 py-0.5 rounded bg-slate-700/80 text-slate-300 select-none">기둥 C</span>
+                    <div class="disk-holder absolute bottom-0 left-0 right-0 flex flex-col-reverse items-center z-20 pointer-events-none"></div>
+                </div>
+
+            </div>
+
+            <!-- Stand/Base of the Pegs -->
+            <div class="h-4 w-full bg-amber-800 rounded-full shadow-lg border border-amber-950 mt-1 relative z-30">
+                <div class="absolute inset-x-4 top-0.5 h-1 bg-amber-700 rounded-full opacity-60"></div>
+            </div>
+        </div>
+
+        <!-- How to play Accordion/Helper -->
+        <div class="bg-slate-800/40 border border-slate-800 p-4 rounded-xl">
+            <h3 class="text-sm font-semibold text-slate-300 mb-2"><i class="fa-solid fa-circle-info mr-1 text-indigo-400"></i> 하노이의 탑 규칙</h3>
+            <ul class="text-xs text-slate-400 space-y-1.5 list-disc list-inside">
+                <li>한 번에 하나의 원판만 기둥 사이를 이동할 수 있습니다.</li>
+                <li>더 큰 원판은 자신보다 작은 원판 위에 놓일 수 없습니다.</li>
+                <li>목표는 <strong class="text-indigo-300">기둥 A</strong>에 있는 모든 원판을 <strong class="text-indigo-300 font-bold">기둥 C</strong>로 이동시키는 것입니다.</li>
+                <li>원판을 직접 옮기려면 <strong class="text-slate-300">원판이 있는 기둥을 먼저 클릭하고, 이동시킬 목적지 기둥을 차례대로 클릭</strong>하세요.</li>
+            </ul>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-4 px-6 border-t border-slate-900 text-center text-xs text-slate-500">
+        <p>© 2026 하노이의 탑 시뮬레이터. All rights reserved.</p>
+    </footer>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+        <div class="bg-slate-800 border border-slate-700 max-w-md w-full rounded-2xl p-6 text-center shadow-2xl transform scale-95 transition-all duration-300">
+            <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
+                <i class="fa-solid fa-crown text-3xl animate-bounce"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-white mb-2">미션 완료! 🎉</h2>
+            <p class="text-sm text-slate-300 mb-6">모든 원판을 성공적으로 기둥 C로 옮겼습니다!</p>
+            
+            <div class="bg-slate-900/60 rounded-xl p-4 mb-6 grid grid-cols-2 gap-4">
+                <div class="border-r border-slate-700/60">
+                    <p class="text-xs text-slate-400">내 이동 횟수</p>
+                    <p class="text-2xl font-mono font-bold text-indigo-400 mt-1" id="modal-my-moves">0</p>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">최소 이동 횟수</p>
+                    <p class="text-2xl font-mono font-bold text-emerald-400 mt-1" id="modal-min-moves">0</p>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="btn-modal-close" class="flex-1 bg-slate-700 hover:bg-slate-600 active:scale-95 text-slate-200 py-2.5 rounded-xl font-semibold text-sm transition-all">
+                    닫기
+                </button>
+                <button id="btn-modal-replay" class="flex-1 bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white py-2.5 rounded-xl font-semibold text-sm transition-all shadow-md shadow-indigo-600/20">
+                    다시 하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Section -->
+    <script>
+        // --- State Management ---
+        let diskCount = 5;
+        let moves = 0;
+        let pegState = [[], [], []]; // Index 0: Peg A, 1: Peg B, 2: Peg C
+        let selectedPegIndex = null; // Currently clicked peg index for manual movement
+        let isSolving = false;
+        let solveSteps = []; // Queue of movements for automatic solve
+        let solveInterval = null;
+        let solveSpeed = 600; // ms per move in auto-solve
+        let isPaused = false;
+
+        // Custom palette for modern disks
+        const diskColors = [
+            'from-rose-500 to-rose-600 border-rose-400',
+            'from-orange-500 to-orange-600 border-orange-400',
+            'from-amber-500 to-amber-600 border-amber-400',
+            'from-emerald-500 to-emerald-600 border-emerald-400',
+            'from-cyan-500 to-cyan-600 border-cyan-400',
+            'from-indigo-500 to-indigo-600 border-indigo-400',
+            'from-purple-500 to-purple-600 border-purple-400',
+            'from-fuchsia-500 to-fuchsia-600 border-fuchsia-400'
+        ];
+
+        // --- DOM Elements ---
+        const diskCountDisplay = document.getElementById('disk-count-display');
+        const movesCountDisplay = document.getElementById('moves-count');
+        const minMovesCountDisplay = document.getElementById('min-moves-count');
+        const btnDecrease = document.getElementById('btn-decrease');
+        const btnIncrease = document.getElementById('btn-increase');
+        const btnReset = document.getElementById('btn-reset');
+        const btnAutoSolve = document.getElementById('btn-auto-solve');
+        const btnAutoSolveText = document.getElementById('btn-auto-solve-text');
+        const btnAutoPause = document.getElementById('btn-auto-pause');
+        const speedSlider = document.getElementById('speed-slider');
+        const statusMessage = document.getElementById('status-message');
+        
+        const pegContainers = [
+            document.getElementById('peg-0'),
+            document.getElementById('peg-1'),
+            document.getElementById('peg-2')
+        ];
+        
+        // Modal elements
+        const successModal = document.getElementById('success-modal');
+        const modalMyMoves = document.getElementById('modal-my-moves');
+        const modalMinMoves = document.getElementById('modal-min-moves');
+        const btnModalClose = document.getElementById('btn-modal-close');
+        const btnModalReplay = document.getElementById('btn-modal-replay');
+
+        // --- Initialize Game ---
+        function initGame() {
+            stopAutoSolve();
+            moves = 0;
+            selectedPegIndex = null;
+            
+            // Calculate minimum moves: 2^n - 1
+            const minMoves = Math.pow(2, diskCount) - 1;
+            
+            movesCountDisplay.textContent = moves;
+            minMovesCountDisplay.textContent = minMoves;
+            diskCountDisplay.textContent = diskCount;
+
+            // Initialize peg data: All disks start at Peg A (index 0) in descending order of size
+            pegState = [[], [], []];
+            for (let i = diskCount; i >= 1; i--) {
+                pegState[0].push(i);
+            }
+
+            renderPegs();
+            updateStatus('원판을 드래그하거나 기둥을 선택해 이동하세요.', 'emerald');
+            clearPegSelection();
+        }
+
+        // --- View Rendering ---
+        function renderPegs() {
+            pegContainers.forEach((pegContainer, pegIdx) => {
+                const diskHolder = pegContainer.querySelector('.disk-holder');
+                diskHolder.innerHTML = ''; // Clear existing rendered disks
+
+                const disksInPeg = pegState[pegIdx];
+                disksInPeg.forEach((diskSize, index) => {
+                    const diskEl = document.createElement('div');
+                    
+                    // Distinct styling for each disk size
+                    diskEl.className = `disk bg-gradient-to-r ${diskColors[diskSize - 1]} border shadow-md text-white text-[10px] font-bold flex items-center justify-center select-none cursor-pointer hover:brightness-110`;
+                    
+                    // Dynamic width based on size relative to total count
+                    const widthPercent = 30 + (diskSize / diskCount) * 65;
+                    diskEl.style.width = `${widthPercent}%`;
+                    
+                    // Fixed responsive heights
+                    diskEl.style.height = `${Math.min(32, 220 / diskCount)}px`;
+                    diskEl.style.borderRadius = '8px';
+                    diskEl.style.marginBottom = '2px';
+                    
+                    // Disk Value visual
+                    diskEl.innerText = diskSize;
+
+                    // Set custom data attributes for interaction tracking
+                    diskEl.setAttribute('data-size', diskSize);
+                    diskEl.setAttribute('data-peg', pegIdx);
+
+                    diskHolder.appendChild(diskEl);
+                });
+            });
+        }
+
+        // --- Handle Manual Movement ---
+        function handlePegClick(pegIndex) {
+            if (isSolving) return; // Prevent user input during auto-solving
+
+            if (selectedPegIndex === null) {
+                // First click: Select the top disk of the clicked peg
+                if (pegState[pegIndex].length === 0) {
+                    updateStatus('이 기둥에는 이동할 원판이 없습니다!', 'rose');
+                    return;
+                }
+                selectedPegIndex = pegIndex;
+                pegContainers[pegIndex].classList.add('selected');
+                updateStatus(`기둥 ${getPegLabel(pegIndex)}의 원판을 선택했습니다. 보낼 곳을 클릭하세요.`, 'indigo');
+            } else {
+                // Second click: Try to move the disk to the target peg
+                const fromPeg = selectedPegIndex;
+                const toPeg = pegIndex;
+
+                if (fromPeg === toPeg) {
+                    // Clicking the same peg deselects it
+                    clearPegSelection();
+                    updateStatus('선택을 취소했습니다.', 'emerald');
+                    return;
+                }
+
+                if (isValidMove(fromPeg, toPeg)) {
+                    moveDisk(fromPeg, toPeg);
+                    checkWinCondition();
+                } else {
+                    updateStatus('움직일 수 없습니다! 더 큰 원판은 작은 원판 위에 올 수 없습니다.', 'rose');
+                }
+                clearPegSelection();
+            }
+        }
+
+        function clearPegSelection() {
+            selectedPegIndex = null;
+            pegContainers.forEach(container => container.classList.remove('selected'));
+        }
+
+        function isValidMove(fromPegIdx, toPegIdx) {
+            const fromPeg = pegState[fromPegIdx];
+            const toPeg = pegState[toPegIdx];
+
+            if (fromPeg.length === 0) return false;
+            if (toPeg.length === 0) return true;
+
+            const topFrom = fromPeg[fromPeg.length - 1];
+            const topTo = toPeg[toPeg.length - 1];
+
+            return topFrom < topTo;
+        }
+
+        function moveDisk(fromPegIdx, toPegIdx) {
+            const disk = pegState[fromPegIdx].pop();
+            pegState[toPegIdx].push(disk);
+            moves++;
+            movesCountDisplay.textContent = moves;
+            renderPegs();
+            updateStatus(`원판 ${disk}을 기둥 ${getPegLabel(fromPegIdx)}에서 기둥 ${getPegLabel(toPegIdx)}로 이동했습니다.`, 'emerald');
+        }
+
+        function getPegLabel(index) {
+            return ['A', 'B', 'C'][index];
+        }
+
+        // --- UI Status Helper ---
+        function updateStatus(text, color = 'slate') {
+            let colorClass = 'bg-slate-500';
+            if (color === 'emerald') colorClass = 'bg-emerald-500';
+            if (color === 'rose') colorClass = 'bg-rose-500';
+            if (color === 'indigo') colorClass = 'bg-indigo-500';
+
+            statusMessage.innerHTML = `
+                <span class="w-2.5 h-2.5 rounded-full ${colorClass} ${color === 'emerald' || color === 'indigo' ? 'animate-pulse' : ''} inline-block"></span>
+                ${text}
+            `;
+        }
+
+        // --- Auto Solve Logic (Hanoi Algorithm) ---
+        function generateHanoiSteps(n, from, to, aux) {
+            if (n === 1) {
+                solveSteps.push({ from, to });
+                return;
+            }
+            generateHanoiSteps(n - 1, from, aux, to);
+            solveSteps.push({ from, to });
+            generateHanoiSteps(n - 1, aux, to, from);
+        }
+
+        function startAutoSolve() {
+            if (isSolving) {
+                // If already running, we might be resuming
+                if (isPaused) {
+                    isPaused = false;
+                    btnAutoPause.classList.remove('hidden');
+                    btnAutoSolveText.textContent = '해결 중...';
+                    btnAutoSolve.classList.add('opacity-50', 'pointer-events-none');
+                    runSimulation();
+                }
+                return;
+            }
+
+            // Fresh start
+            initGame();
+            isSolving = true;
+            isPaused = false;
+            solveSteps = [];
+            
+            // Build the queue of moves
+            generateHanoiSteps(diskCount, 0, 2, 1);
+            
+            // Adjust UI
+            btnAutoPause.classList.remove('hidden');
+            btnAutoSolveText.textContent = '해결 중...';
+            btnAutoSolve.classList.add('opacity-50', 'pointer-events-none');
+            
+            // Disable interactions
+            btnDecrease.disabled = true;
+            btnIncrease.disabled = true;
+            btnDecrease.classList.add('opacity-50');
+            btnIncrease.classList.add('opacity-50');
+
+            runSimulation();
+        }
+
+        function runSimulation() {
+            if (isPaused || !isSolving) return;
+
+            if (solveSteps.length > 0) {
+                const nextMove = solveSteps.shift();
+                moveDisk(nextMove.from, nextMove.to);
+                
+                solveInterval = setTimeout(() => {
+                    runSimulation();
+                }, solveSpeed);
+            } else {
+                // Solved complete
+                stopAutoSolve();
+                checkWinCondition();
+            }
+        }
+
+        function pauseAutoSolve() {
+            isPaused = true;
+            clearTimeout(solveInterval);
+            btnAutoPause.classList.add('hidden');
+            btnAutoSolveText.textContent = '시뮬레이션 재개';
+            btnAutoSolve.classList.remove('opacity-50', 'pointer-events-none');
+            updateStatus('자동 시뮬레이션이 일시정지 되었습니다.', 'indigo');
+        }
+
+        function stopAutoSolve() {
+            isSolving = false;
+            isPaused = false;
+            clearTimeout(solveInterval);
+            
+            btnAutoPause.classList.add('hidden');
+            btnAutoSolveText.textContent = '자동 해결 시작';
+            btnAutoSolve.classList.remove('opacity-50', 'pointer-events-none');
+            
+            btnDecrease.disabled = false;
+            btnIncrease.disabled = false;
+            btnDecrease.classList.remove('opacity-50');
+            btnIncrease.classList.remove('opacity-50');
+        }
+
+        // --- Win Condition ---
+        function checkWinCondition() {
+            // Check if Peg C has all disks
+            if (pegState[2].length === diskCount) {
+                stopAutoSolve();
+                setTimeout(() => {
+                    modalMyMoves.textContent = moves;
+                    modalMinMoves.textContent = Math.pow(2, diskCount) - 1;
+                    successModal.classList.remove('hidden');
+                }, 400);
+            }
+        }
+
+        // --- Event Listeners ---
+        pegContainers.forEach(container => {
+            container.addEventListener('click', () => {
+                const index = parseInt(container.getAttribute('data-peg-index'));
+                handlePegClick(index);
+            });
+        });
+
+        btnDecrease.addEventListener('click', () => {
+            if (diskCount > 3) {
+                diskCount--;
+                initGame();
+            }
+        });
+
+        btnIncrease.addEventListener('click', () => {
+            if (diskCount < 8) {
+                diskCount++;
+                initGame();
+            }
+        });
+
+        btnReset.addEventListener('click', () => {
+            initGame();
+        });
+
+        btnAutoSolve.addEventListener('click', () => {
+            startAutoSolve();
+        });
+
+        btnAutoPause.addEventListener('click', () => {
+            pauseAutoSolve();
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            // Slider is invertly proportional to speed (higher value on slider = faster, meaning lower delay in ms)
+            const sliderValue = parseInt(e.target.value);
+            solveSpeed = 1600 - sliderValue; // Speed map: 100ms -> 1500ms delay, 1500ms -> 100ms delay
+        });
+
+        // Modal triggers
+        btnModalClose.addEventListener('click', () => {
+            successModal.classList.add('hidden');
+        });
+
+        btnModalReplay.addEventListener('click', () => {
+            successModal.classList.add('hidden');
+            initGame();
+        });
+
+        // Initialize on load
+        window.onload = function() {
+            initGame();
+        }
+    </script>
+</body>
+</html>
