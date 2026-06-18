@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Study Simulator</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #475569;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 flex flex-col min-h-screen selection:bg-indigo-500 selection:text-white">
+
+  <!-- NAVIGATION HEADER -->
+  <header class="border-b border-slate-800 bg-slate-900/95 backdrop-blur sticky top-0 z-50 px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    <div class="flex items-center gap-3">
+      <div class="bg-indigo-600 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 text-white animate-pulse">
+        <!-- Brain Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.44 2.5 2.5 0 0 1 0-3.12 3 3 0 0 1 0-4.88 2.5 2.5 0 0 1 0-3.12A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.44 2.5 2.5 0 0 0 0-3.12 3 3 0 0 0 0-4.88 2.5 2.5 0 0 0 0-3.12A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+      </div>
+      <div>
+        <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+          Smart Study Simulator
+        </h1>
+        <p class="text-xs text-slate-400">집중력 강화, 메타인지 메이커 & 개념 인터랙티브 학습 공간</p>
+      </div>
+    </div>
+
+    <!-- Global Tab Switch Navigation -->
+    <nav class="flex flex-wrap bg-slate-950 p-1 rounded-xl border border-slate-800/80">
+      <button onclick="switchTab('pomodoro')" id="tab-btn-pomodoro" class="tab-btn flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all bg-indigo-600 text-white shadow-md">
+        <!-- Timer Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>포커스 타이머</span>
+      </button>
+      <button onclick="switchTab('feynman')" id="tab-btn-feynman" class="tab-btn flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+        <!-- Lightbulb Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .6 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        <span>소크라테스 AI 튜터</span>
+      </button>
+      <button onclick="switchTab('quiz')" id="tab-btn-quiz" class="tab-btn flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+        <!-- GraduationCap Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+        <span>AI 맞춤 퀴즈</span>
+      </button>
+      <button onclick="switchTab('simulators')" id="tab-btn-simulators" class="tab-btn flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all text-slate-400 hover:text-slate-200">
+        <!-- Activity Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <span>개념 시뮬레이터</span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 lg:p-8 flex flex-col gap-6">
+
+    <!-- 1. POMODORO SECTION -->
+    <section id="section-pomodoro" class="tab-content grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Timer Main Controller -->
+      <div class="lg:col-span-2 bg-slate-800/50 border border-slate-700/60 rounded-2xl p-6 flex flex-col items-center justify-between min-h-[480px] shadow-xl">
+        <div class="w-full flex justify-between items-center mb-4">
+          <span id="pomo-mode-badge" class="px-4 py-1.5 rounded-full text-xs font-bold border tracking-wider uppercase border-rose-500 text-rose-400 bg-rose-500/10">
+            집중 시간 🎯
+          </span>
+          <div class="flex gap-1.5">
+            <button onclick="setPomoMode('study')" id="pomo-btn-study" class="pomo-mode-btn px-3 py-1 text-xs font-bold rounded-lg transition-colors bg-indigo-600 text-white">공부</button>
+            <button onclick="setPomoMode('shortBreak')" id="pomo-btn-shortBreak" class="pomo-mode-btn px-3 py-1 text-xs font-bold rounded-lg transition-colors bg-slate-900 text-slate-400 hover:text-slate-200">짧은휴식</button>
+            <button onclick="setPomoMode('longBreak')" id="pomo-btn-longBreak" class="pomo-mode-btn px-3 py-1 text-xs font-bold rounded-lg transition-colors bg-slate-900 text-slate-400 hover:text-slate-200">긴휴식</button>
+          </div>
+        </div>
+
+        <!-- Timer Circle -->
+        <div class="relative w-64 h-64 flex items-center justify-center my-6">
+          <svg class="w-full h-full transform -rotate-90">
+            <circle cx="128" cy="128" r="110" stroke="currentColor" stroke-width="10" class="text-slate-700/40" fill="transparent"/>
+            <circle id="pomo-progress-circle" cx="128" cy="128" r="110" stroke="currentColor" stroke-width="10" class="transition-all duration-300 text-rose-500" fill="transparent" stroke-dasharray="691.15" stroke-dashoffset="0"/>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center">
+            <span id="pomo-time-display" class="text-5xl font-mono font-extrabold tracking-tight">25:00</span>
+            <span id="pomo-status-sub" class="text-xs text-slate-400 mt-1 uppercase tracking-widest">대기 중</span>
+          </div>
+        </div>
+
+        <!-- Action Controls -->
+        <div class="flex items-center gap-4 w-full justify-center">
+          <button onclick="resetPomoTimer()" class="p-3.5 bg-slate-700/60 hover:bg-slate-600 rounded-xl transition text-slate-300" title="초기화">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><polyline points="3 3 3 8 8 8"/></svg>
+          </button>
+          <button onclick="togglePomoTimer()" id="pomo-play-btn" class="px-8 py-3.5 rounded-xl font-bold flex items-center gap-2.5 shadow-lg transition-transform active:scale-95 bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/15 text-white">
+            <svg id="pomo-play-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span id="pomo-play-text">집중 시작</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Sounds & Notes Sidebar -->
+      <div class="flex flex-col gap-6">
+        <!-- Soundscapes Console -->
+        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 shadow-lg">
+          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest mb-3 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            집중 강화 사운드 테라피
+          </h3>
+          <p class="text-xs text-slate-400 mb-4">
+            Web Audio API로 직접 합성하여 오프라인에서도 작동하는 초집중 소음 필터입니다.
+          </p>
+
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="setFocusSound('none')" id="sound-btn-none" class="sound-toggle-btn p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-2 transition-all border-indigo-500 bg-indigo-500/10 text-indigo-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+              <span>소리 없음</span>
+            </button>
+            <button onclick="setFocusSound('white')" id="sound-btn-white" class="sound-toggle-btn p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-2 transition-all border-slate-700 bg-slate-900/60 text-slate-400 hover:border-slate-600">
+              <span class="text-lg">🌧️</span>
+              <span>집중 빗소리</span>
+            </button>
+            <button onclick="setFocusSound('binaural')" id="sound-btn-binaural" class="sound-toggle-btn p-3 rounded-xl border text-xs font-semibold flex flex-col items-center gap-2 transition-all border-slate-700 bg-slate-900/60 text-slate-400 hover:border-slate-600">
+              <span class="text-lg">🎧</span>
+              <span>14Hz 알파파</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Task Planner & Logs -->
+        <div class="bg-slate-800/50 border border-slate-700/60 rounded-2xl p-5 flex-1 shadow-lg flex flex-col">
+          <h3 class="text-sm font-bold text-slate-300 mb-3 tracking-wide">현재 세션의 학습 목표</h3>
+          <input type="text" id="pomo-target-input" placeholder="예: 물리학 역학 파트 인강 1개 수강하기" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"/>
+
+          <div class="mt-5 flex-1 flex flex-col">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">오늘 달성한 학습 내역</h4>
+            <div id="pomo-logs-container" class="flex-1 overflow-y-auto max-h-[160px] bg-slate-900/50 border border-slate-800 rounded-xl p-3 text-xs space-y-2.5">
+              <div class="h-full flex items-center justify-center text-slate-500 italic py-6">
+                오늘 집중한 세션이 아직 없습니다. 파이팅!
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SOCRATES FEYNMAN AI SECTION -->
+    <section id="section-feynman" class="tab-content hidden bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 shadow-xl flex flex-col md:min-h-[600px]">
+      <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-700/60 pb-4 mb-4 gap-4">
+        <div>
+          <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .6 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+            소크라테스식 AI 메타인지 튜터
+          </h2>
+          <p class="text-xs text-slate-400">
+            개념을 직접 설명하며 배우는 최고의 학습법인 '파인만 학습법' 기반의 대화형 공부방입니다.
+          </p>
+        </div>
+        <button id="feynman-reset-btn" onclick="resetFeynmanSession()" class="hidden px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold transition text-slate-200">
+          주제 재설정
+        </button>
+      </div>
+
+      <!-- Feynman Setup State -->
+      <div id="feynman-setup" class="max-w-xl mx-auto w-full my-auto py-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-5 animate-bounce">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .6 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+        </div>
+        <h3 class="text-xl font-bold mb-2 text-slate-200">무엇을 제대로 공부하고 싶나요?</h3>
+        <p class="text-sm text-slate-400 mb-6 leading-relaxed">
+          배우고 있는 어려운 물리 법칙, 수학 정리, 생물학 현상, 심지어 역사 사건까지 알려주세요.<br />
+          AI가 꼬리 질문을 던지며 당신의 논리에 빈틈이 없는지 스스로 점검하게 도와줍니다.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5 w-full">
+          <input type="text" id="feynman-topic-input" placeholder="예: 슈뢰딩거 고양이, 한계효용 체감 법칙, 미적분 기본정리..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-100"/>
+          <button onclick="startFeynmanSession()" id="feynman-start-btn" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-600/15 text-sm shrink-0">
+            튜터링 시작
+          </button>
+        </div>
+      </div>
+
+      <!-- Feynman Chat Active State -->
+      <div id="feynman-chat-area" class="hidden flex-1 flex flex-col h-[500px]">
+        <div class="text-center mb-3">
+          <span id="feynman-active-topic" class="inline-block px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[11px] font-bold">
+            공부 주제: 
+          </span>
+        </div>
+
+        <div id="feynman-messages" class="flex-1 overflow-y-auto mb-4 p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-4">
+          <!-- Chat bubbles injected here -->
+        </div>
+
+        <div id="feynman-error" class="hidden p-3 mb-3 bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs rounded-xl text-center"></div>
+
+        <div class="flex gap-2">
+          <textarea id="feynman-user-input" rows="2" placeholder="직접 이해한 내용을 설명해 보세요..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-slate-200"></textarea>
+          <button onclick="sendFeynmanMessage()" id="feynman-send-btn" class="px-5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition flex items-center justify-center shrink-0 h-12 self-end">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. AI CUSTOM QUIZ SECTION -->
+    <section id="section-quiz" class="tab-content hidden bg-slate-800/40 border border-slate-700/60 rounded-2xl p-6 shadow-xl flex flex-col min-h-[500px]">
+      <div class="border-b border-slate-700/60 pb-4 mb-5">
+        <h2 class="text-lg font-bold text-indigo-400 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+          AI 자가 진단 맞춤 퀴즈 생성기
+        </h2>
+        <p class="text-xs text-slate-400">
+          학습 성취도를 파악하기 위해 원하는 과목이나 개념을 입력하면 엄밀한 5지선다 문제 세트를 무한정 설계해 드립니다.
+        </p>
+      </div>
+
+      <!-- Setup View -->
+      <div id="quiz-setup" class="max-w-xl mx-auto w-full my-auto py-8 text-center flex flex-col items-center">
+        <div class="w-16 h-16 bg-pink-500/10 border border-pink-500/20 rounded-2xl flex items-center justify-center text-pink-400 mb-5 animate-pulse">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>
+        </div>
+        <h3 class="text-xl font-bold mb-2 text-slate-200">어떤 과목/주제 시험을 치르고 싶나요?</h3>
+        <p class="text-sm text-slate-400 mb-6 leading-relaxed">
+          원하는 주제를 입력하면 AI 분석관이 지식 구멍을 예리하게 검출할 5개의 객관식 문제집을 제조합니다.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-2.5 w-full">
+          <input type="text" id="quiz-subject-input" placeholder="예: 고교 지구과학 기하학, 르네상스 예술, 알고리즘 시간복잡도..." class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder-slate-500 text-slate-100"/>
+          <button onclick="generateAIQuiz()" id="quiz-gen-btn" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition shadow-lg shadow-indigo-600/15 text-sm shrink-0">
+            시험 시작
+          </button>
+        </div>
+        <div id="quiz-setup-error" class="hidden mt-4 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-2 rounded-xl"></div>
+      </div>
+
+      <!-- Active Quiz View -->
+      <div id="quiz-active" class="hidden flex-1 flex flex-col lg:flex-row gap-6">
+        <!-- Question & Options Card -->
+        <div class="flex-1 bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center text-xs text-slate-400 mb-3 font-semibold">
+              <span id="quiz-active-subject">주제: </span>
+              <span id="quiz-progress-display" class="font-mono text-indigo-400">문항: 1 / 5</span>
+            </div>
+            <h4 id="quiz-question-text" class="text-base font-bold text-slate-100 mb-5 leading-relaxed">
+              Q. 로딩중...
+            </h4>
+
+            <div id="quiz-options-container" class="space-y-2.5">
+              <!-- Dynamically rendered options -->
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="mt-6 flex justify-end gap-3 border-t border-slate-800 pt-4">
+            <button onclick="submitQuizAnswer()" id="quiz-submit-btn" disabled class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-xl font-bold text-sm transition">
+              제출 및 정답확인
+            </button>
+            <button onclick="nextQuizQuestion()" id="quiz-next-btn" class="hidden px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold text-sm transition">
+              다음 문제
+            </button>
+          </div>
+        </div>
+
+        <!-- Explanations panel -->
+        <div class="w-full lg:w-80 bg-slate-900/40 border border-slate-800 rounded-xl p-5 flex flex-col">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">설명 및 피드백</h4>
+          <div id="quiz-feedback-box" class="flex-1 flex flex-col justify-between">
+            <div class="flex flex-col items-center justify-center text-center text-slate-500 text-xs py-8 h-full">
+              <span class="text-3xl mb-2 opacity-50">🧭</span>
+              <p>보기를 선택하고 제출을 누르면 상세 오답 해설이 이곳에 시각화됩니다.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Completed View -->
+      <div id="quiz-completed" class="hidden max-w-xl mx-auto w-full text-center py-10 flex flex-col items-center">
+        <span class="text-5xl mb-4">🏆</span>
+        <h3 class="text-2xl font-black text-indigo-400 mb-1">퀴즈 학습 완료!</h3>
+        <p class="text-slate-400 text-sm mb-6">수고하셨습니다. 정답과 하단 해설을 통해 개념을 다시 보완해 보세요.</p>
+        
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full mb-6">
+          <div class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">최종 성취도</div>
+          <div id="quiz-score-num" class="text-4xl font-extrabold text-slate-100 font-mono">
+            0 / 5 <span class="text-lg text-slate-400 font-normal">(0%)</span>
+          </div>
+          <div class="mt-4">
+            <p id="quiz-achievement-msg" class="text-sm font-medium"></p>
+          </div>
+        </div>
+
+        <button onclick="restartQuizSession()" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition">
+          새로운 주제로 도전하기
+        </button>
+      </div>
+    </section>
+
+    <!-- 4. CONCEPT SIMULATORS SECTION -->
+    <section id="section-simulators" class="tab-content hidden flex flex-col gap-6">
+      <div class="flex gap-2 border-b border-slate-800 pb-2">
+        <button onclick="switchSubTab('physics')" id="subtab-btn-physics" class="subtab-btn px-4 py-2 text-sm font-bold rounded-lg transition-colors bg-slate-800 text-indigo-400">
+          진자의 물리 운동 시뮬레이터 (Physics)
+        </button>
+        <button onclick="switchSubTab('sorting')" id="subtab-btn-sorting" class="subtab-btn px-4 py-2 text-sm font-bold rounded-lg transition-colors text-slate-400 hover:text-slate-200">
+          정렬 알고리즘 시각화 (Computer Science)
+        </button>
+      </div>
+
+      <!-- Physics Content -->
+      <div id="subtab-content-physics" class="bg-slate-800/20 border border-slate-700/50 rounded-xl p-5 flex flex-col lg:flex-row gap-6">
+        <div class="flex-1">
+          <h3 class="text-base font-bold text-slate-200 mb-1">단진자 물리 역학 학습기</h3>
+          <p class="text-xs text-slate-400 mb-4">
+            중력 가속도, 질량, 줄 길이에 따라 진자가 어떻게 요동치고 에너지가 상호 변환되는지 관찰하세요. (마우스나 터치로 공을 직접 잡아 던질 수 있습니다)
+          </p>
+
+          <div class="relative bg-slate-950 rounded-xl border border-slate-800 overflow-hidden cursor-crosshair">
+            <canvas id="physics-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="w-full lg:w-72 bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 flex flex-col gap-4">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-2">
+            진자 제어판
+          </h4>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>줄 길이 (Length)</span>
+              <span id="label-len">150px</span>
+            </div>
+            <input type="range" id="slider-len" min="60" max="220" value="150" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>중력 상수 (g)</span>
+              <span id="label-g">9.8 m/s²</span>
+            </div>
+            <input type="range" id="slider-g" min="1" max="25" step="0.5" value="9.8" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+            <div class="flex gap-1.5 mt-1.5">
+              <button onclick="setGravityPreset(1.62)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[10px] rounded text-slate-400">🌙 달 (1.6)</button>
+              <button onclick="setGravityPreset(9.8)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[10px] rounded text-slate-400">🌍 지구 (9.8)</button>
+              <button onclick="setGravityPreset(24.79)" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-[10px] rounded text-slate-400">🪐 목성 (24.8)</button>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>추 질량 (Mass)</span>
+              <span id="label-mass">15kg</span>
+            </div>
+            <input type="range" id="slider-mass" min="5" max="40" value="15" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>공기 저항 (Damping)</span>
+              <span id="label-damping">0.010</span>
+            </div>
+            <input type="range" id="slider-damping" min="0" max="0.08" step="0.002" value="0.01" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+          </div>
+
+          <div class="text-[11px] bg-slate-950/60 text-slate-400 leading-relaxed p-2.5 rounded-lg border border-slate-800/80">
+            <p class="font-semibold text-slate-300 mb-0.5">💡 물리 상식:</p>
+            공기 저항이 0에 도달하면 진자의 **역학적 에너지 합(초록 그래프)**이 감쇄 없이 평생 일정하게 보존되는 모습을 뚜렷하게 관찰하실 수 있습니다.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sorting Content -->
+      <div id="subtab-content-sorting" class="hidden bg-slate-800/20 border border-slate-700/50 rounded-xl p-5">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-5">
+          <div>
+            <h3 class="text-base font-bold text-slate-200">정렬 알고리즘 애니메이션 학습기</h3>
+            <p class="text-xs text-slate-400">
+              시간 복잡도와 정렬의 연산 과정을 시각화하여 더 깊이 있게 알고리즘의 원리를 깨달으세요.
+            </p>
+          </div>
+
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="resetSortArray()" id="sort-btn-reset" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs font-bold rounded-lg text-slate-200 transition">
+              배열 난수 재생성 🎲
+            </button>
+            <button onclick="runBubbleSort()" id="sort-btn-bubble" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-xs font-bold rounded-lg text-white transition">
+              버블 정렬 시작
+            </button>
+            <button onclick="runInsertionSort()" id="sort-btn-insert" class="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-xs font-bold rounded-lg text-white transition">
+              삽입 정렬 시작
+            </button>
+          </div>
+        </div>
+
+        <!-- Bar visualizer workspace -->
+        <div id="sort-bars-workspace" class="bg-slate-950 p-6 rounded-xl border border-slate-800 flex items-end justify-center gap-1.5 min-h-[220px]">
+          <!-- Array bars generated here -->
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>비교 속도 (Speed)</span>
+              <span id="label-sort-speed">70</span>
+            </div>
+            <input type="range" id="slider-sort-speed" min="10" max="100" value="70" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+          </div>
+
+          <div>
+            <div class="flex justify-between text-xs text-slate-300 font-semibold mb-1">
+              <span>데이터 개수 (Size)</span>
+              <span id="label-sort-size">24</span>
+            </div>
+            <input type="range" id="slider-sort-size" min="10" max="45" value="24" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"/>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="py-6 border-t border-slate-800 text-center text-xs text-slate-500 bg-slate-950 mt-auto">
+    <p>© 2026 Smart Study Simulator. Study Smart, Deep, and Interactive.</p>
+  </footer>
+
+  <!-- CORE SCRIPT LOGIC (VANILLA JS + WEB AUDIO + CANVAS + GEMINI API) -->
+  <script>
+    // Global API Configuration
+    const apiKey = ""; // Runtime automatically injected by the environment
+
+    // Tab switcher helper
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+        btn.classList.add('text-slate-400', 'hover:text-slate-200');
+      });
+
+      const activeSection = document.getElementById(`section-${tabId}`);
+      if (activeSection) activeSection.classList.remove('hidden');
+
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+        activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+      }
+
+      // Special Tab-inits
+      if (tabId === 'simulators') {
+        initPhysicsSimulator();
+      } else {
+        stopPhysicsSimulator();
+      }
+    }
+
+    // Custom fetch with exponential backoff retry
+    async function fetchWithRetry(url, options, retries = 5, delay = 1000) {
+      try {
+        const response = await fetch(url, options);
+        if (!response.ok) {
+          if (response.status === 429 && retries > 0) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+            return fetchWithRetry(url, options, retries - 1, delay * 2);
+          }
+          throw new Error(`API Request failed with status: ${response.status}`);
+        }
+        return await response.json();
+      } catch (error) {
+        if (retries > 0) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+          return fetchWithRetry(url, options, retries - 1, delay * 2);
+        }
+        throw error;
+      }
+    }
+
+    // =========================================================================
+    // 1. POMODORO TIMER LOGIC (WITH AUDIO SYNTHESIZERS)
+    // =========================================================================
+    let pomoMinutes = 25;
+    let pomoSeconds = 0;
+    let pomoIsActive = false;
+    let pomoInterval = null;
+    let pomoMode = 'study'; // study, shortBreak, longBreak
+    let pomoSoundType = 'none'; // none, white, binaural
+
+    const pomoConfigs = {
+      study: { time: 25, label: '집중 시간 🎯', class: 'border-rose-500 text-rose-400 bg-rose-500/10', circleColor: '#F43F5E' },
+      shortBreak: { time: 5, label: '짧은 휴식 ☕', class: 'border-emerald-500 text-emerald-400 bg-emerald-500/10', circleColor: '#10B981' },
+      longBreak: { time: 15, label: '긴 휴식 🍃', class: 'border-indigo-500 text-indigo-400 bg-indigo-500/10', circleColor: '#6366F1' }
+    };
+
+    let audioCtx = null;
+    let noiseNode = null;
+    let binauralNodes = [];
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playAlertBeep() {
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.55);
+      } catch(e) {}
+    }
+
+    function stopSynthesizedSounds() {
+      if (noiseNode) {
+        try { noiseNode.stop(); } catch(e){}
+        noiseNode = null;
+      }
+      if (binauralNodes.length > 0) {
+        binauralNodes.forEach(n => {
+          try { n.stop(); } catch(e){}
+        });
+        binauralNodes = [];
+      }
+    }
+
+    function applyFocusSound() {
+      stopSynthesizedSounds();
+      if (pomoSoundType === 'none' || !pomoIsActive) return;
+
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      if (pomoSoundType === 'white') {
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        
+        let lastOut = 0.0;
+        for (let i = 0; i < bufferSize; i++) {
+          const white = Math.random() * 2 - 1;
+          // Brownian low-frequency ambient rumble formula
+          output[i] = (lastOut + (0.02 * white)) / 1.02;
+          lastOut = output[i];
+          output[i] *= 3.5;
+        }
+
+        const noise = audioCtx.createBufferSource();
+        noise.buffer = noiseBuffer;
+        noise.loop = true;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 400; // Low frequency hum
+
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0.45;
+
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        noise.start();
+        noiseNode = noise;
+      } else if (pomoSoundType === 'binaural') {
+        const oscL = audioCtx.createOscillator();
+        const oscR = audioCtx.createOscillator();
+        const merger = audioCtx.createChannelMerger(2);
+        const gain = audioCtx.createGain();
+
+        oscL.type = 'sine';
+        oscL.frequency.value = 120; // Carrier freq
+        oscR.type = 'sine';
+        oscR.frequency.value = 134; // 14Hz Alpha offset
+
+        gain.gain.value = 0.08;
+
+        const gainL = audioCtx.createGain();
+        const gainR = audioCtx.createGain();
+        oscL.connect(gainL);
+        oscR.connect(gainR);
+
+        gainL.connect(merger, 0, 0);
+        gainR.connect(merger, 0, 1);
+        merger.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        oscL.start();
+        oscR.start();
+
+        binauralNodes = [oscL, oscR];
+      }
+    }
+
+    function setFocusSound(type) {
+      pomoSoundType = type;
+      document.querySelectorAll('.sound-toggle-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-400');
+        btn.classList.add('border-slate-700', 'bg-slate-900/60', 'text-slate-400');
+      });
+
+      const activeBtn = document.getElementById(`sound-btn-${type}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('border-slate-700', 'bg-slate-900/60', 'text-slate-400');
+        activeBtn.classList.add('border-indigo-500', 'bg-indigo-500/10', 'text-indigo-400');
+      }
+
+      applyFocusSound();
+    }
+
+    function updatePomoDisplay() {
+      const displayStr = `${pomoMinutes.toString().padStart(2, '0')}:${pomoSeconds.toString().padStart(2, '0')}`;
+      document.getElementById('pomo-time-display').textContent = displayStr;
+
+      // Progress bar formula: (TotalSecs - CurrentSecs) / TotalSecs
+      const totalSecs = pomoConfigs[pomoMode].time * 60;
+      const currentSecs = pomoMinutes * 60 + pomoSeconds;
+      const percent = totalSecs > 0 ? ((totalSecs - currentSecs) / totalSecs) : 0;
+      
+      const maxOffset = 691.15; // 2 * PI * r (110)
+      const offset = maxOffset * (1 - percent);
+      
+      const circleEl = document.getElementById('pomo-progress-circle');
+      circleEl.style.strokeDashoffset = offset;
+      circleEl.style.stroke = pomoConfigs[pomoMode].circleColor;
+    }
+
+    function setPomoMode(mode) {
+      pomoIsActive = false;
+      if (pomoInterval) clearInterval(pomoInterval);
+      
+      pomoMode = mode;
+      pomoMinutes = pomoConfigs[mode].time;
+      pomoSeconds = 0;
+
+      // Reset Active Buttons
+      document.querySelectorAll('.pomo-mode-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-slate-900', 'text-slate-400', 'hover:text-slate-200');
+      });
+      document.getElementById(`pomo-btn-${mode}`).classList.remove('bg-slate-900', 'text-slate-400');
+      document.getElementById(`pomo-btn-${mode}`).classList.add('bg-indigo-600', 'text-white');
+
+      // Update badge
+      const badge = document.getElementById('pomo-mode-badge');
+      badge.className = `px-4 py-1.5 rounded-full text-xs font-bold border tracking-wider uppercase ${pomoConfigs[mode].class}`;
+      badge.textContent = pomoConfigs[mode].label;
+
+      document.getElementById('pomo-status-sub').textContent = '대기 중';
+      document.getElementById('pomo-play-text').textContent = '집중 시작';
+      document.getElementById('pomo-play-icon').innerHTML = `<polygon points="5 3 19 12 5 21 5 3"/>`;
+
+      stopSynthesizedSounds();
+      updatePomoDisplay();
+    }
+
+    function togglePomoTimer() {
+      initAudio();
+      if (pomoIsActive) {
+        // Pause
+        pomoIsActive = false;
+        if (pomoInterval) clearInterval(pomoInterval);
+        document.getElementById('pomo-play-text').textContent = '다시 시작';
+        document.getElementById('pomo-play-icon').innerHTML = `<polygon points="5 3 19 12 5 21 5 3"/>`;
+        document.getElementById('pomo-status-sub').textContent = '일시 정지';
+        stopSynthesizedSounds();
+      } else {
+        // Start
+        pomoIsActive = true;
+        document.getElementById('pomo-play-text').textContent = '일시정지';
+        document.getElementById('pomo-play-icon').innerHTML = `<rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/>`;
+        document.getElementById('pomo-status-sub').textContent = '집중 중...';
+        
+        applyFocusSound();
+
+        pomoInterval = setInterval(() => {
+          if (pomoSeconds === 0) {
+            if (pomoMinutes === 0) {
+              handleTimerComplete();
+            } else {
+              pomoMinutes--;
+              pomoSeconds = 59;
+            }
+          } else {
+            pomoSeconds--;
+          }
+          updatePomoDisplay();
+        }, 1000);
+      }
+    }
+
+    function resetPomoTimer() {
+      pomoIsActive = false;
+      if (pomoInterval) clearInterval(pomoInterval);
+      pomoMinutes = pomoConfigs[pomoMode].time;
+      pomoSeconds = 0;
+      
+      document.getElementById('pomo-play-text').textContent = '집중 시작';
+      document.getElementById('pomo-play-icon').innerHTML = `<polygon points="5 3 19 12 5 21 5 3"/>`;
+      document.getElementById('pomo-status-sub').textContent = '대기 중';
+      
+      stopSynthesizedSounds();
+      updatePomoDisplay();
+    }
+
+    let studyHistory = [];
+
+    function handleTimerComplete() {
+      pomoIsActive = false;
+      if (pomoInterval) clearInterval(pomoInterval);
+      playAlertBeep();
+
+      const targetInput = document.getElementById('pomo-target-input');
+      const targetText = targetInput.value.trim() || '기록된 목표가 없습니다.';
+      const now = new Date();
+      const timestamp = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+
+      studyHistory.unshift({
+        mode: pomoMode,
+        duration: `${pomoConfigs[pomoMode].time}분`,
+        target: targetText,
+        time: timestamp
+      });
+
+      renderStudyHistory();
+
+      // Auto cycle
+      if (pomoMode === 'study') {
+        setPomoMode('shortBreak');
+      } else {
+        setPomoMode('study');
+      }
+      targetInput.value = '';
+    }
+
+    function renderStudyHistory() {
+      const container = document.getElementById('pomo-logs-container');
+      if (studyHistory.length === 0) {
+        container.innerHTML = `
+          <div class="h-full flex items-center justify-center text-slate-500 italic py-6">
+            오늘 집중한 세션이 아직 없습니다. 파이팅!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = studyHistory.map(item => {
+        const badgeClass = item.mode === 'study' ? 'bg-rose-500/20 text-rose-400' : 'bg-emerald-500/20 text-emerald-400';
+        return `
+          <div class="flex justify-between items-start border-b border-slate-800/80 pb-2 last:border-0 last:pb-0">
+            <div>
+              <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold mr-1.5 uppercase ${badgeClass}">
+                ${item.mode === 'study' ? '집중' : '휴식'}
+              </span>
+              <span class="text-slate-300 font-medium">${item.target}</span>
+            </div>
+            <div class="text-right text-slate-500 shrink-0 ml-2">
+              <div>${item.duration}</div>
+              <div class="text-[10px]">${item.time}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // =========================================================================
+    // 2. SOCRATES FEYNMAN AI TUTOR LOGIC
+    // =========================================================================
+    let feynmanTopic = '';
+    let feynmanHistory = [];
+    let feynmanLoading = false;
+
+    const socraticSystemPrompt = `당신은 사용자의 메타인지와 학습 상태를 극대화하는 최고의 소크라테스식 학습 조력자(Socratic Tutor)입니다.
+사용자가 특정 물리, 수학, 역사, 경제 등 어떤 공부 개념에 대해 배우기 시작하면, 사용자가 직접 설명하게 만드는 "파인만 학습법(Feynman Technique)"을 따릅니다.
+절대로 먼저 정답을 줄줄이 알려주지 마십시오!
+
+작동 규칙:
+1. 사용자가 개념을 입력하면, 사용자의 수준을 자극하는 따뜻하면서도 도전적인 첫 질문을 가볍게 던지세요. ("예를 들어, 식물이 햇빛을 밥으로 바꾸는 과정을 어린아이에게 설명한다고 해볼까요? 광합성은 어떻게 시작하나요?")
+2. 사용자가 설명을 적어내면, 그 설명에서 맞은 부분과 논리적으로 빠졌거나 틀린 부분을 부드럽게 분석해 줍니다.
+3. 그 후, 사용자가 그 부분을 스스로 메우거나 유추할 수 있도록 다음 질문을 소크라테스 식으로 던지세요. (어려운 힌트나 비유를 활용)
+4. 모든 문체는 상냥한 반말(또는 격려 가득한 존댓말)을 구사하되, 학문적인 명확성은 완벽히 유지하세요.
+5. 짧고 대화하듯이 친절하게 대답하세요.`;
+
+    async function startFeynmanSession() {
+      const topicInput = document.getElementById('feynman-topic-input');
+      feynmanTopic = topicInput.value.trim();
+      if (!feynmanTopic) return;
+
+      feynmanLoading = true;
+      document.getElementById('feynman-start-btn').disabled = true;
+      document.getElementById('feynman-error').classList.add('hidden');
+
+      feynmanHistory = [];
+
+      try {
+        const payload = {
+          contents: [{
+            parts: [{ text: `내가 오늘 공부하려는 주제는 [${feynmanTopic}]야. 소크라테스식 질문으로 내가 스스로 설명하며 깊게 이해할 수 있게 첫 번째 질문을 던져줘!` }]
+          }],
+          systemInstruction: {
+            parts: [{ text: socraticSystemPrompt }]
+          }
+        };
+
+        const result = await callGeminiAPI(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "오류가 발생했습니다. 다시 시도해주세요.";
+
+        feynmanHistory.push({ role: 'model', text });
+        
+        // Render view
+        document.getElementById('feynman-setup').classList.add('hidden');
+        document.getElementById('feynman-chat-area').classList.remove('hidden');
+        document.getElementById('feynman-reset-btn').classList.remove('hidden');
+        document.getElementById('feynman-active-topic').textContent = `공부 주제: ${feynmanTopic}`;
+        
+        renderFeynmanMessages();
+      } catch (err) {
+        const errEl = document.getElementById('feynman-error');
+        errEl.textContent = "AI 연결에 실패했습니다. API 키 구성을 확인하시거나 나중에 다시 시도해주세요.";
+        errEl.classList.remove('hidden');
+      } finally {
+        feynmanLoading = false;
+        document.getElementById('feynman-start-btn').disabled = false;
+      }
+    }
+
+    async function sendFeynmanMessage() {
+      const inputEl = document.getElementById('feynman-user-input');
+      const userText = inputEl.value.trim();
+      if (!userText || feynmanLoading) return;
+
+      inputEl.value = '';
+      feynmanHistory.push({ role: 'user', text: userText });
+      renderFeynmanMessages();
+
+      feynmanLoading = true;
+      document.getElementById('feynman-send-btn').disabled = true;
+      document.getElementById('feynman-error').classList.add('hidden');
+
+      // Inject loader bubble
+      const msgBox = document.getElementById('feynman-messages');
+      const loader = document.createElement('div');
+      loader.id = "feynman-chat-loader";
+      loader.className = "flex items-center gap-2 mr-auto text-slate-400 text-xs py-2";
+      loader.innerHTML = `
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0ms"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 150ms"></div>
+        <div class="w-2 h-2 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 300ms"></div>
+        <span>선생님이 나의 설명을 분석하여 메타인지 지도를 그리는 중...</span>
+      `;
+      msgBox.appendChild(loader);
+      msgBox.scrollTop = msgBox.scrollHeight;
+
+      try {
+        const formattedContents = feynmanHistory.map(msg => ({
+          role: msg.role === 'model' ? 'model' : 'user',
+          parts: [{ text: msg.text }]
+        }));
+
+        const payload = {
+          contents: formattedContents,
+          systemInstruction: {
+            parts: [{ text: socraticSystemPrompt }]
+          }
+        };
+
+        const result = await callGeminiAPI(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "답변을 가져오지 못했습니다.";
+
+        feynmanHistory.push({ role: 'model', text });
+        renderFeynmanMessages();
+      } catch (err) {
+        document.getElementById('feynman-error').textContent = "메시지 발송에 실패했습니다. 다시 작성해 보세요.";
+        document.getElementById('feynman-error').classList.remove('hidden');
+      } finally {
+        const loaderEl = document.getElementById('feynman-chat-loader');
+        if (loaderEl) loaderEl.remove();
+        feynmanLoading = false;
+        document.getElementById('feynman-send-btn').disabled = false;
+      }
+    }
+
+    function renderFeynmanMessages() {
+      const msgBox = document.getElementById('feynman-messages');
+      msgBox.innerHTML = `
+        <div class="text-center">
+          <span class="inline-block px-3 py-1 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full text-[11px] font-bold">
+            공부 주제: ${feynmanTopic}
+          </span>
+        </div>
+      `;
+
+      feynmanHistory.forEach(msg => {
+        const bubble = document.createElement('div');
+        const isUser = msg.role === 'user';
+        bubble.className = `flex flex-col max-w-[85%] ${isUser ? 'ml-auto items-end' : 'mr-auto items-start'}`;
+
+        const senderLabel = isUser ? '나의 설명 💬' : '소크라테스 튜터 🦉';
+        const bubbleClass = isUser 
+          ? 'bg-indigo-600 text-white rounded-tr-none' 
+          : 'bg-slate-800 text-slate-100 border border-slate-700/50 rounded-tl-none';
+
+        bubble.innerHTML = `
+          <span class="text-[10px] text-slate-500 mb-1 font-semibold uppercase tracking-wider">${senderLabel}</span>
+          <div class="p-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${bubbleClass}">${msg.text}</div>
+        `;
+        msgBox.appendChild(bubble);
+      });
+
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function resetFeynmanSession() {
+      feynmanTopic = '';
+      feynmanHistory = [];
+      document.getElementById('feynman-topic-input').value = '';
+      document.getElementById('feynman-setup').classList.remove('hidden');
+      document.getElementById('feynman-chat-area').classList.add('hidden');
+      document.getElementById('feynman-reset-btn').classList.add('hidden');
+    }
+
+    async function callGeminiAPI(payload) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+      return await fetchWithRetry(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    // =========================================================================
+    // 3. AI CUSTOM QUIZ GENERATOR LOGIC
+    // =========================================================================
+    let quizSubject = '';
+    let quizQuestions = [];
+    let currentQuizIdx = 0;
+    let selectedQuizAnswer = null;
+    let isQuizAnswerChecked = false;
+    let quizScore = 0;
+
+    async function generateAIQuiz() {
+      const subjectInput = document.getElementById('quiz-subject-input');
+      quizSubject = subjectInput.value.trim();
+      if (!quizSubject) return;
+
+      const genBtn = document.getElementById('quiz-gen-btn');
+      const errEl = document.getElementById('quiz-setup-error');
+      
+      genBtn.disabled = true;
+      genBtn.textContent = 'AI 문제 제조 중...';
+      errEl.classList.add('hidden');
+
+      try {
+        const systemPrompt = `당신은 사용자가 공부하고 검증할 수 있는 깊이 있고 엄밀한 5지선다(A,B,C,D,E) 학술 시험형 문제 출제위원입니다. 
+사용자가 입력한 주제에 대해 5문항의 퀴즈를 엄선하여 정확한 JSON 형태로만 반환해야 합니다.`;
+
+        const responseSchema = {
+          type: "OBJECT",
+          properties: {
+            quizzes: {
+              type: "ARRAY",
+              description: "An array of 5 study questions based on the topic",
+              items: {
+                type: "OBJECT",
+                properties: {
+                  question: { type: "STRING", description: "The conceptual or calculated study question" },
+                  options: {
+                    type: "ARRAY",
+                    description: "Exactly 5 realistic candidate answers in Korean",
+                    items: { type: "STRING" }
+                  },
+                  correctIndex: { type: "INTEGER", description: "The 0-based index of the correct answer (0 to 4)" },
+                  explanation: { type: "STRING", description: "Detailed, scholarly explanation in Korean clarifying why it's correct and why other choices are wrong." }
+                },
+                required: ["question", "options", "correctIndex", "explanation"]
+              }
+            }
+          },
+          required: ["quizzes"]
+        };
+
+        const payload = {
+          contents: [{
+            parts: [{ text: `주제 [${quizSubject}]에 관련한 학습 성취도 진단용 5지선다 객관식 퀴즈 5개를 만들어 줘. 학습에 도움이 되는 깊은 설명도 제공해야 해.` }]
+          }],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: responseSchema
+          }
+        };
+
+        const result = await callGeminiAPI(payload);
+        const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+        const parsed = JSON.parse(text);
+
+        if (parsed.quizzes && parsed.quizzes.length > 0) {
+          quizQuestions = parsed.quizzes;
+          currentQuizIdx = 0;
+          selectedQuizAnswer = null;
+          isQuizAnswerChecked = false;
+          quizScore = 0;
+
+          document.getElementById('quiz-setup').classList.add('hidden');
+          document.getElementById('quiz-completed').classList.add('hidden');
+          document.getElementById('quiz-active').classList.remove('hidden');
+
+          renderQuizQuestion();
+        } else {
+          throw new Error("Invalid structure returned");
+        }
+      } catch (err) {
+        errEl.textContent = "퀴즈를 실시간으로 설계하는 도중 네트워크 장해가 발생했습니다. 다시 시작해 보세요.";
+        errEl.classList.remove('hidden');
+      } finally {
+        genBtn.disabled = false;
+        genBtn.textContent = '시험 시작';
+      }
+    }
+
+    function renderQuizQuestion() {
+      const q = quizQuestions[currentQuizIdx];
+      document.getElementById('quiz-active-subject').textContent = `주제: ${quizSubject}`;
+      document.getElementById('quiz-progress-display').textContent = `문항: ${currentQuizIdx + 1} / ${quizQuestions.length}`;
+      document.getElementById('quiz-question-text').textContent = `Q. ${q.question}`;
+
+      // Reset bottom buttons
+      document.getElementById('quiz-submit-btn').classList.remove('hidden');
+      document.getElementById('quiz-submit-btn').disabled = true;
+      document.getElementById('quiz-next-btn').classList.add('hidden');
+
+      // Clear feedback pane
+      const feedbackBox = document.getElementById('quiz-feedback-box');
+      feedbackBox.innerHTML = `
+        <div class="flex flex-col items-center justify-center text-center text-slate-500 text-xs py-8 h-full">
+          <span class="text-3xl mb-2 opacity-50">🧭</span>
+          <p>보기를 선택하고 제출을 누르면 상세 오답 해설이 이곳에 시각화됩니다.</p>
+        </div>
+      `;
+
+      // Draw Options
+      const optionsContainer = document.getElementById('quiz-options-container');
+      optionsContainer.innerHTML = q.options.map((option, idx) => {
+        return `
+          <button id="quiz-opt-btn-${idx}" onclick="selectQuizAnswer(${idx})" class="w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-slate-800 hover:border-slate-700 bg-slate-950/40 text-slate-300">
+            <span id="quiz-opt-badge-${idx}" class="w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-slate-800 text-slate-400">
+              ${String.fromCharCode(65 + idx)}
+            </span>
+            <span class="leading-relaxed">${option}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectQuizAnswer(idx) {
+      if (isQuizAnswerChecked) return;
+      selectedQuizAnswer = idx;
+
+      // Clear highlights
+      quizQuestions[currentQuizIdx].options.forEach((_, optIdx) => {
+        const btn = document.getElementById(`quiz-opt-btn-${optIdx}`);
+        const badge = document.getElementById(`quiz-opt-badge-${optIdx}`);
+        btn.className = "w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-slate-800 hover:border-slate-700 bg-slate-950/40 text-slate-300";
+        badge.className = "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-slate-800 text-slate-400";
+      });
+
+      // Highlight selected
+      const activeBtn = document.getElementById(`quiz-opt-btn-${idx}`);
+      const activeBadge = document.getElementById(`quiz-opt-badge-${idx}`);
+      activeBtn.className = "w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-indigo-500 bg-indigo-500/10 text-indigo-300";
+      activeBadge.className = "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-indigo-600 text-white";
+
+      document.getElementById('quiz-submit-btn').disabled = false;
+    }
+
+    function submitQuizAnswer() {
+      if (selectedQuizAnswer === null || isQuizAnswerChecked) return;
+      isQuizAnswerChecked = true;
+
+      const q = quizQuestions[currentQuizIdx];
+      const isCorrect = selectedQuizAnswer === q.correctIndex;
+
+      if (isCorrect) {
+        quizScore++;
+      }
+
+      // Format answers styling
+      q.options.forEach((_, idx) => {
+        const btn = document.getElementById(`quiz-opt-btn-${idx}`);
+        const badge = document.getElementById(`quiz-opt-badge-${idx}`);
+        btn.disabled = true;
+
+        if (idx === q.correctIndex) {
+          btn.className = "w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-emerald-500 bg-emerald-500/15 text-emerald-400 font-semibold";
+          badge.className = "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-emerald-500 text-white";
+        } else if (idx === selectedQuizAnswer) {
+          btn.className = "w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-rose-500 bg-rose-500/15 text-rose-400";
+          badge.className = "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-rose-500 text-white";
+        } else {
+          btn.className = "w-full text-left p-3.5 rounded-xl border text-sm transition-all flex items-start gap-3 border-slate-800 opacity-60 text-slate-500 cursor-not-allowed";
+          badge.className = "w-6 h-6 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs bg-slate-800 text-slate-500";
+        }
+      });
+
+      // Update Feedback Box
+      const feedbackBox = document.getElementById('quiz-feedback-box');
+      const isCorrectText = isCorrect 
+        ? `<div class="flex items-center gap-2 mb-3 text-emerald-400 font-bold text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>정답입니다!</span>
+           </div>`
+        : `<div class="flex items-center gap-2 mb-3 text-rose-400 font-bold text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <span>틀렸습니다.</span>
+           </div>`;
+
+      feedbackBox.innerHTML = `
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            ${isCorrectText}
+            <div class="text-slate-300 text-xs leading-relaxed space-y-2 bg-slate-950/40 p-3 rounded-lg border border-slate-800 max-h-[300px] overflow-y-auto">
+              <p class="font-semibold text-slate-200">정답: ${String.fromCharCode(65 + q.correctIndex)}번</p>
+              <p class="text-slate-400 leading-relaxed">${q.explanation}</p>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('quiz-submit-btn').classList.add('hidden');
+      document.getElementById('quiz-next-btn').classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      selectedQuizAnswer = null;
+      isQuizAnswerChecked = false;
+
+      if (currentQuizIdx + 1 < quizQuestions.length) {
+        currentQuizIdx++;
+        renderQuizQuestion();
+      } else {
+        // Show results
+        document.getElementById('quiz-active').classList.add('hidden');
+        document.getElementById('quiz-completed').classList.remove('hidden');
+
+        const scoreContainer = document.getElementById('quiz-score-num');
+        const percent = (quizScore / quizQuestions.length) * 100;
+        scoreContainer.innerHTML = `${quizScore} / ${quizQuestions.length} <span class="text-lg text-slate-400 font-normal">(${percent}%)</span>`;
+
+        const msgContainer = document.getElementById('quiz-achievement-msg');
+        if (quizScore === quizQuestions.length) {
+          msgContainer.className = "text-sm text-emerald-400 font-medium";
+          msgContainer.textContent = "완벽해요! 개념을 100% 흡수하고 있습니다. 🎓";
+        } else if (quizScore >= 3) {
+          msgContainer.className = "text-sm text-amber-400 font-medium";
+          msgContainer.textContent = "좋은 성적입니다! 헷갈렸던 오답 노트를 복습해 보세요. ✨";
+        } else {
+          msgContainer.className = "text-sm text-rose-400 font-medium";
+          msgContainer.textContent = "괜찮아요! 소크라테스 튜터와 개념 대화방을 가져보세요. 🦉";
+        }
+      }
+    }
+
+    function restartQuizSession() {
+      quizQuestions = [];
+      quizSubject = '';
+      document.getElementById('quiz-subject-input').value = '';
+      document.getElementById('quiz-setup').classList.remove('hidden');
+      document.getElementById('quiz-completed').classList.add('hidden');
+      document.getElementById('quiz-active').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 4. CONCEPT SIMULATORS SECTION
+    // =========================================================================
+    function switchSubTab(subTabId) {
+      document.querySelectorAll('.subtab-btn').forEach(btn => {
+        btn.classList.remove('bg-slate-800', 'text-indigo-400');
+        btn.classList.add('text-slate-400', 'hover:text-slate-200');
+      });
+
+      const activeBtn = document.getElementById(`subtab-btn-${subTabId}`);
+      activeBtn.classList.remove('text-slate-400', 'hover:text-slate-200');
+      activeBtn.classList.add('bg-slate-800', 'text-indigo-400');
+
+      if (subTabId === 'physics') {
+        document.getElementById('subtab-content-physics').classList.remove('hidden');
+        document.getElementById('subtab-content-sorting').classList.add('hidden');
+        initPhysicsSimulator();
+      } else {
+        document.getElementById('subtab-content-physics').classList.add('hidden');
+        document.getElementById('subtab-content-sorting').classList.remove('hidden');
+        stopPhysicsSimulator();
+        resetSortArray();
+      }
+    }
+
+    // ==========================================
+    // 4-A. PHYSICS PENDULUM SIMULATOR
+    // ==========================================
+    let physAnimFrame = null;
+    let physLength = 150;
+    let physGravity = 9.8;
+    let physDamping = 0.01;
+    let physMass = 15;
+
+    let physState = {
+      angle: Math.PI / 4,
+      angularVelocity: 0,
+      angularAcceleration: 0,
+      isDragging: false
+    };
+
+    function initPhysicsSimulator() {
+      const canvas = document.getElementById('physics-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const resizeCanvas = () => {
+        canvas.width = canvas.parentElement.clientWidth;
+        canvas.height = 360;
+      };
+      
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const originX = () => canvas.width / 2;
+      const originY = 50;
+
+      // Mouse/Touch drag utility
+      const getCoords = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - rect.left,
+          y: clientY - rect.top
+        };
+      };
+
+      const onDown = (e) => {
+        const coords = getCoords(e);
+        const bobX = originX() + physLength * Math.sin(physState.angle);
+        const bobY = originY + physLength * Math.cos(physState.angle);
+        const dist = Math.sqrt((coords.x - bobX) ** 2 + (coords.y - bobY) ** 2);
+        const bobRadius = 10 + physMass * 0.5;
+
+        if (dist < bobRadius + 15) {
+          physState.isDragging = true;
+          physState.angularVelocity = 0;
+        }
+      };
+
+      const onMove = (e) => {
+        if (!physState.isDragging) return;
+        const coords = getCoords(e);
+        const dx = coords.x - originX();
+        const dy = coords.y - originY;
+        physState.angle = Math.atan2(dx, dy);
+      };
+
+      const onUp = () => {
+        physState.isDragging = false;
+      };
+
+      canvas.addEventListener('mousedown', onDown);
+      canvas.addEventListener('mousemove', onMove);
+      canvas.addEventListener('mouseup', onUp);
+      canvas.addEventListener('mouseleave', onUp);
+
+      canvas.addEventListener('touchstart', onDown);
+      canvas.addEventListener('touchmove', onMove);
+      canvas.addEventListener('touchend', onUp);
+
+      const loop = () => {
+        if (!physState.isDragging) {
+          // Equation: theta'' = - (g / L) * sin(theta) - damping * theta'
+          const gTerm = -(physGravity / physLength) * Math.sin(physState.angle);
+          physState.angularAcceleration = gTerm - (physDamping * physState.angularVelocity);
+          physState.angularVelocity += physState.angularAcceleration;
+          physState.angle += physState.angularVelocity;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Center line
+        ctx.strokeStyle = '#33415550';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(originX(), 0);
+        ctx.lineTo(originX(), canvas.height);
+        ctx.stroke();
+
+        // Wire
+        const bobX = originX() + physLength * Math.sin(physState.angle);
+        const bobY = originY + physLength * Math.cos(physState.angle);
+
+        ctx.strokeStyle = '#818CF8';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(originX(), originY);
+        ctx.lineTo(bobX, bobY);
+        ctx.stroke();
+
+        // Top Pivot
+        ctx.fillStyle = '#475569';
+        ctx.beginPath();
+        ctx.arc(originX(), originY, 6, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Mass Bob
+        const bobRadius = 10 + physMass * 0.5;
+        ctx.fillStyle = '#E11D48';
+        ctx.beginPath();
+        ctx.arc(bobX, bobY, bobRadius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Energy Calculations
+        const h = physLength * (1 - Math.cos(physState.angle));
+        const potentialEnergy = physMass * (physGravity / 10) * h;
+        const v = physLength * physState.angularVelocity;
+        const kineticEnergy = 0.5 * physMass * (v * v) * 0.001;
+        const totalEnergy = potentialEnergy + kineticEnergy;
+
+        // UI texts
+        ctx.fillStyle = '#94A3B8';
+        ctx.font = 'bold 11px Courier New';
+        ctx.fillText(`각도 (Angle): ${(physState.angle * (180 / Math.PI)).toFixed(1)}°`, 15, 30);
+        ctx.fillText(`주기 (T): ${(2 * Math.PI * Math.sqrt(physLength / (physGravity * 10))).toFixed(2)}s (이론값)`, 15, 48);
+
+        // Bars
+        const graphX = canvas.width - 200;
+        const maxBarWidth = 160;
+
+        ctx.fillStyle = '#64748B';
+        ctx.fillText('위치에너지 (PE)', graphX, 25);
+        ctx.fillStyle = '#3B82F6';
+        ctx.fillRect(graphX, 30, Math.min(potentialEnergy * 1.5, maxBarWidth), 10);
+
+        ctx.fillStyle = '#64748B';
+        ctx.fillText('운동에너지 (KE)', graphX, 55);
+        ctx.fillStyle = '#EF4444';
+        ctx.fillRect(graphX, 60, Math.min(kineticEnergy * 1.5, maxBarWidth), 10);
+
+        ctx.fillStyle = '#64748B';
+        ctx.fillText('총 역학에너지 (E)', graphX, 85);
+        ctx.fillStyle = '#10B981';
+        ctx.fillRect(graphX, 90, Math.min(totalEnergy * 1.5, maxBarWidth), 10);
+
+        physAnimFrame = requestAnimationFrame(loop);
+      };
+
+      if (physAnimFrame) cancelAnimationFrame(physAnimFrame);
+      loop();
+    }
+
+    function stopPhysicsSimulator() {
+      if (physAnimFrame) {
+        cancelAnimationFrame(physAnimFrame);
+        physAnimFrame = null;
+      }
+    }
+
+    // Connect slider listeners
+    document.getElementById('slider-len').addEventListener('input', (e) => {
+      physLength = Number(e.target.value);
+      document.getElementById('label-len').textContent = `${physLength}px`;
+    });
+
+    document.getElementById('slider-g').addEventListener('input', (e) => {
+      physGravity = Number(e.target.value);
+      document.getElementById('label-g').textContent = `${physGravity.toFixed(1)} m/s²`;
+    });
+
+    document.getElementById('slider-mass').addEventListener('input', (e) => {
+      physMass = Number(e.target.value);
+      document.getElementById('label-mass').textContent = `${physMass}kg`;
+    });
+
+    document.getElementById('slider-damping').addEventListener('input', (e) => {
+      physDamping = Number(e.target.value);
+      document.getElementById('label-damping').textContent = physDamping.toFixed(3);
+    });
+
+    function setGravityPreset(val) {
+      physGravity = val;
+      document.getElementById('slider-g').value = val;
+      document.getElementById('label-g').textContent = `${val.toFixed(1)} m/s²`;
+    }
+
+
+    // ==========================================
+    // 4-B. SORTING ALGORITHM VISUALIZER
+    // ==========================================
+    let sortArray = [];
+    let sortSize = 24;
+    let sortSpeed = 70;
+    let isSorting = false;
+    let activeIndices = [];
+    let completedIndices = [];
+
+    function resetSortArray() {
+      if (isSorting) return;
+      sortArray = [];
+      for (let i = 0; i < sortSize; i++) {
+        sortArray.push(Math.floor(Math.random() * 160) + 20);
+      }
+      activeIndices = [];
+      completedIndices = [];
+      renderSortArray();
+    }
+
+    function renderSortArray() {
+      const container = document.getElementById('sort-bars-workspace');
+      container.innerHTML = sortArray.map((val, idx) => {
+        let barColor = 'bg-indigo-500/80';
+        if (activeIndices.includes(idx)) {
+          barColor = 'bg-rose-500 animate-pulse';
+        } else if (completedIndices.includes(idx)) {
+          barColor = 'bg-emerald-500/80';
+        }
+
+        const width = Math.max(12, Math.min(30, 480 / sortSize));
+        return `
+          <div class="rounded-t transition-all ${barColor}" style="height: ${val}px; width: ${width}px;" title="값: ${val}"></div>
+        `;
+      }).join('');
+    }
+
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    async function runBubbleSort() {
+      if (isSorting) return;
+      isSorting = true;
+      disableSortingInputs(true);
+
+      const arr = [...sortArray];
+      const len = arr.length;
+      let localSorted = [];
+
+      for (let i = 0; i < len; i++) {
+        for (let j = 0; j < len - i - 1; j++) {
+          activeIndices = [j, j + 1];
+          renderSortArray();
+          await sleep(105 - sortSpeed);
+
+          if (arr[j] > arr[j + 1]) {
+            const temp = arr[j];
+            arr[j] = arr[j + 1];
+            arr[j + 1] = temp;
+            sortArray[j] = arr[j];
+            sortArray[j + 1] = arr[j + 1];
+            renderSortArray();
+          }
+        }
+        localSorted.push(len - i - 1);
+        completedIndices = [...localSorted];
+      }
+
+      activeIndices = [];
+      renderSortArray();
+      isSorting = false;
+      disableSortingInputs(false);
+    }
+
+    async function runInsertionSort() {
+      if (isSorting) return;
+      isSorting = true;
+      disableSortingInputs(true);
+
+      const arr = [...sortArray];
+      const len = arr.length;
+
+      for (let i = 1; i < len; i++) {
+        let key = arr[i];
+        let j = i - 1;
+        activeIndices = [i, j];
+        renderSortArray();
+        await sleep(105 - sortSpeed);
+
+        while (j >= 0 && arr[j] > key) {
+          arr[j + 1] = arr[j];
+          sortArray[j + 1] = arr[j];
+          j = j - 1;
+          renderSortArray();
+          activeIndices = [j + 1, i];
+          await sleep(105 - sortSpeed);
+        }
+        arr[j + 1] = key;
+        sortArray[j + 1] = key;
+        renderSortArray();
+      }
+
+      completedIndices = Array.from({ length: len }, (_, k) => k);
+      activeIndices = [];
+      renderSortArray();
+      isSorting = false;
+      disableSortingInputs(false);
+    }
+
+    function disableSortingInputs(disabled) {
+      document.getElementById('sort-btn-reset').disabled = disabled;
+      document.getElementById('sort-btn-bubble').disabled = disabled;
+      document.getElementById('sort-btn-insert').disabled = disabled;
+      document.getElementById('slider-sort-speed').disabled = disabled;
+      document.getElementById('slider-sort-size').disabled = disabled;
+    }
+
+    document.getElementById('slider-sort-speed').addEventListener('input', (e) => {
+      sortSpeed = Number(e.target.value);
+      document.getElementById('label-sort-speed').textContent = sortSpeed;
+    });
+
+    document.getElementById('slider-sort-size').addEventListener('input', (e) => {
+      sortSize = Number(e.target.value);
+      document.getElementById('label-sort-size').textContent = sortSize;
+      resetSortArray();
+    });
+
+    // Window load triggers
+    window.addEventListener('load', () => {
+      setPomoMode('study');
+      resetSortArray();
+    });
+  </script>
+</body>
+</html>
